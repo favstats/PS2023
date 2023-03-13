@@ -195,7 +195,7 @@ all_dat <- #read_csv("nl_advertisers.csv") %>%
     bind_rows(internal_page_ids) %>%
     bind_rows(wtm_data) %>%
     bind_rows(rep) %>%
-    bind_rows(more_data) %>%
+    bind_rows(more_data %>% mutate(source = "new")) %>%
     distinct(page_id, .keep_all = T) %>%
     add_count(page_name, sort  =T) %>%
     mutate(remove_em = n >= 2 & str_ends(page_id, "0")) %>%
@@ -225,6 +225,9 @@ all_dat <- #read_csv("nl_advertisers.csv") %>%
         str_detect(party, "BBB") ~ "BBB",
         T ~ party
     ))
+
+# all_dat %>% filter(source == "new") %>% View
+
 
 # all_dat %>%
 #     filter(party == "And") %>% View
