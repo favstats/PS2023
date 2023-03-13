@@ -132,9 +132,15 @@ wtm_data <- read_csv("data/wtm-advertisers-nl-2023-03-13.csv") %>% #names
     str_detect(party, "BVNL") ~ "BVNL",
     str_detect(party, "Ja21") ~ "JA21",
     str_detect(page_name, "Alliantie") ~ "Alliantie",
+    str_detect(page_name, "Partij voor de Dieren") ~ "PvdD",
+    str_detect(page_name, "Christine Govaert") ~ "BBB",
+    str_detect(page_name, "BVNL|Belang van Nederland") ~ "BVNL",
     T ~ party
   )) #%>% #View
     # count(party, sort = T)
+
+# wtm_data %>% 
+#   filter(party == "And") %>% View
 
 # wtm_data %>% count(party)
 
