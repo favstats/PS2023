@@ -7,10 +7,11 @@ library(RSelenium)
 library(netstat)
 library(RSelenium)
 port <- netstat::free_port()
+podf <- sample(4000L:5000L,1)
 rD <- rsDriver(browser = "firefox"
                     ,chromever=NULL
                 ,check = F
-                ,port = port
+                ,port = podf
                 ,verbose = T
 )
 
@@ -91,10 +92,25 @@ retrieve_spend <- function(id) {
 ggl_spend <- readRDS("data/ggl_spend.rds")
 
 # retrieve_spend(unique(ggl_spend$Advertiser_ID)[1])
+# fvd <- retrieve_spend("AR09355418985304162305")
+
 
 
 ggl_sel_sp <- unique(ggl_spend$Advertiser_ID) %>%
     map_dfr_progress(retrieve_spend)
+
+# ggl_sel_sp %>% 
+  # filter(advertiser_id %in% "AR09355418985304162305")
+# 
+# # ggl_spend %>% 
+#   # filter(Advertiser_ID %in% "AR09355418985304162305")
+# 
+# ggl_sel_sp$advertiser_id %>% setdiff(unique(ggl_spend$Advertiser_ID), .)
+#   filter(!(advertiser_id %in% unique(ggl_spend$Advertiser_ID)))
+
+# ggl_sel_sp <- ggl_sel_sp %>% 
+  # bind_rows(fvd) %>% 
+  # distinct(advertiser_id, .keep_all = T)
 
 
 saveRDS(ggl_sel_sp, file = "data/ggl_sel_sp.rds")

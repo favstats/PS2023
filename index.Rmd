@@ -446,7 +446,7 @@ get_table_dat(election_dat7, party) %>%
 
 ### Google 
 
-For Google platforms, data accessed via the [Google Transparency Report](https://transparencyreport.google.com/political-ads/region/NL) provides exact spending on how much money was spent by parties in last 30 days. The table below shows spending in the timerange between **February 11th to March 13th 2023**.
+For Google platforms, data accessed via the [Google Transparency Report](https://transparencyreport.google.com/political-ads/region/NL) provides exact spending on how much money was spent by parties in last 30 days. The table below shows spending in the timerange between **February 12th to March 13th 2023**.
 
 ```{r}
 ggl_all <- readRDS("data/ggl_all.rds")
