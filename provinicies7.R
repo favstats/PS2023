@@ -531,3 +531,189 @@ ggl_all <- tt_ads %>%
 
 
 saveRDS(ggl_all, file = "data/ggl_all.rds")
+
+
+
+
+
+all_ads <- vroom::vroom("C:/Users/fabio/Downloads/skeptic/google-political-ads-creative-stats.csv")
+
+all_ads %>%
+  filter(Advertiser_ID %in% ggl_sel_sp$advertiser_id) %>%
+  mutate(Date_Range_Start = lubridate::ymd(Date_Range_Start)) %>%
+  filter(Date_Range_Start >= as.Date("2023-02-05")) %>%
+  mutate(Spend_Range_Max_EUR = as.numeric(Spend_Range_Max_EUR)) %>% 
+  left_join(ggl_spend %>% distinct(Advertiser_ID, .keep_all = T) %>% select(Advertiser_ID, party1)) %>% 
+  group_by(party1) %>% 
+  mutate(total = sum(Spend_Range_Max_EUR)) %>% 
+  mutate(perc = Spend_Range_Max_EUR/total) %>% 
+  ungroup() %>% 
+  # arrange(desc(Spend_Range_Max_EUR)) %>% View
+  # count(Age_Targeting, sort = T) %>% View
+  count(Geo_Targeting_Included, sort = T) %>%
+  slice()
+  # sample_n(5) %>% dput()
+  mutate(Geo_Targeting_Included = str_remove_all(Geo_Targeting_Included, ",Netherlands")) %>% View
+
+  
+
+  Drenthe,Netherlands
+  North Holland,Netherlands
+  South Holland,Netherlands
+  Utrecht,Netherlands
+  North Brabant,Netherlands
+  Overijssel,Netherlands
+  Zeeland,Netherlands
+  Limburg,Netherlands
+  Flevoland,Netherlands
+  Friesland,Netherlands
+  Groningen,Netherlands
+  Gelderland,Netherlands
+
+
+  
+
+  
+  
+  
+  library(stringr)
+  
+  # your list of Dutch province names
+  province_names <- c("Drenthe,Netherlands", "North Holland,Netherlands", "South Holland,Netherlands", "Utrecht,Netherlands", "North Brabant,Netherlands", "Overijssel,Netherlands", "Zeeland,Netherlands", "Limburg,Netherlands", "Flevoland,Netherlands", "Friesland,Netherlands", "Groningen,Netherlands", "Gelderland,Netherlands")
+  
+  # example strings to match
+  
+  # example strings to match
+  example_strings <- c("South Holland,Netherlands",
+                       "Zoeterwoude,Zoeterwoude,South Holland,Netherlands",
+                       "Zuidhorn,Groningen,Netherlands", 
+                       "Zuidplas,South Holland,Netherlands",
+                       "North Brabant,Netherlands, Zwartewaterland,Overijssel,Netherlands, Zwijndrecht,Zwijndrecht,South Holland,Netherlands, het Bildt,Friesland,Netherlands", 
+                       "North Brabant,Netherlands", 
+                       "South Holland,Netherlands, Groningen,Netherlands")
+  
+  # pattern to match province names
+  pattern <- paste0("(?<=^|,\\s)(?:", paste(province_names, collapse = "|"), ")(?=,|$)")
+  
+  # extract province names from example strings
+  province_matches <- str_extract_all(example_strings, pattern)
+  
+  # print matches
+  province_matches
+  
+  
+sp_all_ads <- all_ads %>%
+    filter(Advertiser_ID %in% ggl_sel_sp$advertiser_id) %>%
+    mutate(Date_Range_Start = lubridate::ymd(Date_Range_Start)) %>%
+    filter(Date_Range_Start >= as.Date("2023-02-05")) %>%
+    mutate(Spend_Range_Max_EUR = as.numeric(Spend_Range_Max_EUR)) %>% 
+    left_join(ggl_spend %>% distinct(Advertiser_ID, .keep_all = T) %>% select(Advertiser_ID, party1)) 
+
+geo_sp_all <- sp_all_ads %>% 
+    group_by(party1) %>% 
+    mutate(total = sum(Spend_Range_Max_EUR)) %>% 
+    mutate(perc = Spend_Range_Max_EUR/total) %>% 
+    ungroup() %>% 
+    # arrange(desc(Spend_Range_Max_EUR)) %>% View
+    # count(Age_Targeting, sort = T) %>% View
+    # count(Geo_Targeting_Included, sort = T) %>% 
+    rowwise() %>% 
+    mutate(provinces = paste0(unlist(str_extract_all(Geo_Targeting_Included, pattern)), collapse = "---")) %>% 
+    ungroup() %>% 
+    separate_rows(provinces, sep = "---") %>% 
+    mutate(sep_entities_count = str_count(Geo_Targeting_Included, ", ")) %>% 
+    mutate(sep_entities_count = sep_entities_count+1) %>% 
+    mutate(province_count = str_count(Geo_Targeting_Included, provinces)) %>% 
+    mutate(same_provinces = sep_entities_count==province_count) %>% 
+    # sample_n(20) %>% 
+    mutate(partial_spend = case_when(
+      !same_provinces ~ Spend_Range_Max_EUR/sep_entities_count,
+      same_provinces ~ Spend_Range_Max_EUR
+    )) %>% 
+    select(Spend_Range_Max_EUR, partial_spend, everything()) %>% 
+    arrange(desc(partial_spend)) %>% 
+    group_by(party1, provinces) %>% 
+    summarize(partial_spend = sum(partial_spend)) %>% 
+    mutate(provinces = str_remove_all(provinces, ",Netherlands")) %>% 
+    drop_na(partial_spend) %>% 
+    ungroup()
+
+
+hc_geo <- sp_all_ads %>% 
+  filter(Geo_Targeting_Included == "Netherlands") %>% 
+  group_by(party1) %>% 
+  summarize(Spend_Range_Max_EUR = sum(Spend_Range_Max_EUR)) %>% 
+  mutate(partial_spend = Spend_Range_Max_EUR/12) %>% 
+  expand_grid(province_names) %>% 
+  select(party1, partial_spend, provinces = province_names) %>% 
+  mutate(provinces = str_remove_all(provinces, ",Netherlands")) %>% 
+  bind_rows(geo_sp_all) %>% 
+  group_by(party1, provinces) %>%
+  summarize(partial_spend = sum(partial_spend)) %>% 
+  mutate(name = case_when(
+    str_detect(provinces, "North Holland") ~ "Noord-Holland",
+    str_detect(provinces, "South Holland") ~ "Zuid-Holland",
+    str_detect(provinces, "North Brabant") ~ "Noord-Brabant",
+    T ~ provinces
+  ))
+
+
+
+hc_geo %>% 
+  group_split(party1) %>% 
+  map(~{chart_maps(.x, F, mapdata)}) %>% hw_grid(ncol = 4) %>% 
+  htmltools::browsable()
+
+chart_maps(hc_geo %>% filter(party1 == "Volt Nederland"), F, mapdata)
+
+library(highcharter)
+mapdata <- get_data_from_map(download_map_data("https://code.highcharts.com/mapdata/countries/nl/nl-all.js"))
+
+mapdata %>% count(name, sort =T)
+
+chart_maps <- function(x, download_data = T, mapdata) {
+  hc <- hcmap2(
+    "https://code.highcharts.com/mapdata/countries/nl/nl-all.js",
+    custom_map = mapdata,
+    data = x,
+    download_map_data = T,
+    value = "partial_spend ",
+    joinBy = c("name", "name"),
+    # name = trans_internal$plot_tooltip_geo,
+    dataLabels = list(enabled = TRUE, format = "{point.name}"),
+    borderColor = "#FAFAFA",
+    borderWidth = 0.2,
+    tooltip = list(
+      valueDecimals = 0,
+      valueSuffix = "€"
+    )
+  ) %>% 
+    # hc_colorAxis(
+    #   minColor = "white",
+    #   maxColor = unique(x$colorful),
+    #   min = 0,
+    #   max = 40
+    # )%>% 
+    hc_title(
+      text = unique(x$party1)
+    ) %>%
+    hc_exporting(
+      enabled = TRUE
+    )
+  
+  # download_data <<- F
+  
+  return(hc)
+}
+
+
+
+fb_aggr %>% 
+  hc_plotter(filters = dutch_parties_fb,
+             plot_type = unlist_it(trans$choices, 4),
+             plot_type_sub = unlist_it(trans$targeted_ads_choices, 3),
+             platform = "Facebook",
+             mapdata = map_data,
+             trans_internal = trans,
+             last_updated = update_time, minmax = "Minimum"
+  )
