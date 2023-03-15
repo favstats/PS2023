@@ -1,7 +1,10 @@
 page_name,page_id,party,source,disclaimer,amount_spent_eur,number_of_ads_in_library,party1,party2,path,date_produced,spend,remove_em
-PvdA Waalwijk,108781350908437,PvdA,NA,NA,NA,NA,NA,NA,NA,NA,NA,FALSE
+NA,102368056133655,GroenLinks,NA,NA,NA,NA,NA,NA,NA,NA,NA,FALSE
+NA,108991395339466,PvdD,NA,NA,NA,NA,NA,NA,NA,NA,NA,FALSE
+NA,1986808398204909,CDA,NA,NA,NA,NA,NA,NA,NA,NA,NA,FALSE
 SGP Utrechtse Heuvelrug,510879102598586,SGP,NA,NA,NA,NA,NA,NA,NA,NA,NA,FALSE
 SGP Utrechtse Heuvelrug,673294653100165,SGP,NA,NA,NA,NA,NA,NA,NA,NA,NA,FALSE
+PvdA Waalwijk,108781350908437,PvdA,NA,NA,NA,NA,NA,NA,NA,NA,NA,FALSE
 Raoul Boucke,1378051212479416,D66,NA,NA,NA,NA,NA,NA,NA,NA,NA,FALSE
 PvdA Het Hogeland,1663807260315461,PvdA,NA,NA,NA,NA,NA,NA,NA,NA,NA,FALSE
 PvdA Goes,1412530858983763,PvdA,yo,NA,NA,NA,NA,NA,NA,NA,NA,FALSE
@@ -1044,3 +1047,27 @@ ChristenUnie-SGP Noord-Brabant,1585007828396450,ChristenUnie,NA,ChristenUnie-SGP
 PvdA Dalfsen,472491742803558,PvdA,NA,PvdA Dalfsen,≤100,2,PvdA,PvdA,data/reports/FacebookAdLibraryReport_2023-03-09_NL_yesterday_advertisers.csv,2023-03-09,50,FALSE
 ClaudioBlok.VVD,106598091938464,VVD,NA,Claudio Blok,≤100,1,VVD,NA,data/reports/FacebookAdLibraryReport_2023-03-09_NL_yesterday_advertisers.csv,2023-03-09,50,FALSE
 SP Heerlen,257312361663,SP,NA,Arlette Vrusch,≤100,1,SP,NA,data/reports/FacebookAdLibraryReport_2023-03-09_NL_yesterday_advertisers.csv,2023-03-09,50,FALSE
+Ekrem Selimspahic,116492734695937,DENK,NA,NA,NA,NA,NA,NA,NA,NA,NA,FALSE
+Tiemen Jan van Dijk,118426264517896,VVD,NA,NA,NA,NA,NA,NA,NA,NA,NA,FALSE
+D66 Oisterwijk,1345685305522860,D66,NA,NA,NA,NA,NA,NA,NA,NA,NA,FALSE
+CDA Midden-Groningen,1649013595380040,CDA,NA,NA,NA,NA,NA,NA,NA,NA,NA,FALSE
+Rudy Tegels,837647219611717,CDA,NA,NA,NA,NA,NA,NA,NA,NA,NA,FALSE
+Hart voor Bloemendaal,692423567477734,And,NA,NA,NA,NA,NA,NA,NA,NA,NA,FALSE
+JA21 Noord-Holland,670551846971300,Ja21,NA,NA,NA,NA,NA,NA,NA,NA,NA,FALSE
+JA21 Limburg,111453351878488,Ja21,NA,NA,NA,NA,NA,NA,NA,NA,NA,FALSE
+Dario Prinsen,100286368532402,BBB,NA,NA,NA,NA,NA,NA,NA,NA,NA,FALSE
+CDA Brabant,715432808550645,CDA,new,CDA Brabant,≤100,32,CDA,CDA,data/reports/FacebookAdLibraryReport_2023-03-10_NL_yesterday_advertisers.csv,2023-03-10,50,FALSE
+PvdA Tiel,1414131035469220,PvdA,new,Darwin Verbeek,≤100,1,PvdA,NA,data/reports/FacebookAdLibraryReport_2023-03-10_NL_yesterday_advertisers.csv,2023-03-10,50,FALSE
+ChristenUnie Gelderland,1462668553973131,ChristenUnie,new,ChristenUnie Gelderland,≤100,1,ChristenUnie,ChristenUnie,data/reports/FacebookAdLibraryReport_2023-03-10_NL_yesterday_advertisers.csv,2023-03-10,50,FALSE
+SP Limburg,1706286032795068,SP,new,SP Limburg,≤100,1,SP,SP,data/reports/FacebookAdLibraryReport_2023-03-10_NL_yesterday_advertisers.csv,2023-03-10,50,FALSE
+Waterschap 50PLUSpartij Hoogheemraadschap Schieland en de Krimpenerwaard,364072567479011,50PLUS,new,These ads ran without a disclaimer,≤100,1,50PLUS,NA,data/reports/FacebookAdLibraryReport_2023-03-10_NL_yesterday_advertisers.csv,2023-03-10,50,FALSE
+PVV Provincie Utrecht,296125217114169,PVV,new,PVV Provincie Utrecht,≤100,1,PVV,PVV,data/reports/FacebookAdLibraryReport_2023-03-11_NL_yesterday_advertisers.csv,2023-03-11,50,FALSE
+Laura Ouderkerken - VVD,224122308340547,VVD,new,Laura Ouderkerken - VVD,≤100,3,VVD,VVD,data/reports/FacebookAdLibraryReport_2023-03-11_NL_yesterday_advertisers.csv,2023-03-11,50,FALSE
+Marc Uijen #6 VVD - Waterschap Aa en Maas,108664558840675,VVD,new,Marc Sebastiaan Uijen,≤100,1,VVD,NA,data/reports/FacebookAdLibraryReport_2023-03-11_NL_yesterday_advertisers.csv,2023-03-11,50,FALSE
+CDA IJsselstein,343890219086754,CDA,new,Frank Van Kippersluis,≤100,1,CDA,NA,data/reports/FacebookAdLibraryReport_2023-03-11_NL_yesterday_advertisers.csv,2023-03-11,50,FALSE
+SP Leeuwarden,504650446219790,SP,new,SP Leeuwarden,≤100,1,SP,SP,data/reports/FacebookAdLibraryReport_2023-03-12_NL_yesterday_advertisers.csv,2023-03-12,50,FALSE
+GroenLinks Provincie Groningen,705292922857832,GroenLinks,new,Bas De Boer,≤100,1,GroenLinks,NA,data/reports/FacebookAdLibraryReport_2023-03-12_NL_yesterday_advertisers.csv,2023-03-12,50,FALSE
+ChristenUnie Stadskanaal,342907735809607,ChristenUnie,new,Ronald Elzen,≤100,2,ChristenUnie,NA,data/reports/FacebookAdLibraryReport_2023-03-12_NL_yesterday_advertisers.csv,2023-03-12,50,FALSE
+PvdA Hengelo,613634905375602,PvdA,new,PvdA Hengelo,≤100,1,PvdA,PvdA,data/reports/FacebookAdLibraryReport_2023-03-12_NL_yesterday_advertisers.csv,2023-03-12,50,FALSE
+PvdA Eemnes,106917755229086,PvdA,new,Wilma A. de Boer-Leijsma,≤100,1,PvdA,NA,data/reports/FacebookAdLibraryReport_2023-03-12_NL_yesterday_advertisers.csv,2023-03-12,50,FALSE
+VVDTexel,154451034721385,VVD,new,VVD Texel,≤100,1,VVD,VVD,data/reports/FacebookAdLibraryReport_2023-03-12_NL_yesterday_advertisers.csv,2023-03-12,50,FALSE

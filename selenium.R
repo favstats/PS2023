@@ -1,7 +1,7 @@
 
 library(RSelenium)
 
-# https://adstransparency.google.com/advertiser/AR09355418985304162305?political&region=NL&preset-date=Last%2030%20days
+# https://adstransparency.google.com/advertiser/AR09355418985304162305?political&region=NL&preset-date=Last%207%20days
 
 
 library(netstat)
@@ -23,10 +23,10 @@ remDr <- rD$client
 
 # ggl_spend
 
-retrieve_spend <- function(id) {
+retrieve_spend <- function(id, days = 30) {
 
     # id <- "AR18091944865565769729"
-    url <- glue::glue("https://adstransparency.google.com/advertiser/{id}?political&region=NL&preset-date=Last%2030%20days")
+    url <- glue::glue("https://adstransparency.google.com/advertiser/{id}?political&region=NL&preset-date=Last%20{days}%20days")
     remDr$navigate(url)
 
     Sys.sleep(1)
@@ -92,7 +92,7 @@ retrieve_spend <- function(id) {
 ggl_spend <- readRDS("data/ggl_spend.rds")
 
 # retrieve_spend(unique(ggl_spend$Advertiser_ID)[1])
-# fvd <- retrieve_spend("AR09355418985304162305")
+# fvd <- retrieve_spend("AR03397262231409262593")
 
 
 
@@ -105,15 +105,20 @@ ggl_sel_sp <- unique(ggl_spend$Advertiser_ID) %>%
 # # ggl_spend %>% 
 #   # filter(Advertiser_ID %in% "AR09355418985304162305")
 # 
-# ggl_sel_sp$advertiser_id %>% setdiff(unique(ggl_spend$Advertiser_ID), .)
-#   filter(!(advertiser_id %in% unique(ggl_spend$Advertiser_ID)))
+ggl_sel_sp$advertiser_id %>% setdiff(unique(ggl_spend$Advertiser_ID), .)
+  # filter(!(advertiser_id %in% unique(ggl_spend$Advertiser_ID)))
 
-# ggl_sel_sp <- ggl_sel_sp %>% 
-  # bind_rows(fvd) %>% 
-  # distinct(advertiser_id, .keep_all = T)
+# ggl_sel_sp <- ggl_sel_sp %>%
+# bind_rows(fvd) %>%
+# distinct(advertiser_id, .keep_all = T)
 
 
 saveRDS(ggl_sel_sp, file = "data/ggl_sel_sp.rds")
+
+ggl_sel_sp7 <- unique(ggl_spend$Advertiser_ID) %>%
+  map_dfr_progress(retrieve_spend, 7)
+
+saveRDS(ggl_sel_sp7, file = "data/ggl_sel_sp7.rds")
 
 
 
@@ -129,8 +134,8 @@ retrieve_spend_daily <- function(id, the_date) {
   
   Sys.sleep(3)
   
-  root5 <- "/html/body/div[3]" 
-  root3 <- "/html/body/div[5]" 
+  root3 <- "/html/body/div[3]" 
+  root5 <- "/html/body/div[5]" 
   ending <- "/root/advertiser-page/political-tabs/div/material-tab-strip/div/tab-button[2]/material-ripple"
   
   try({
@@ -156,7 +161,7 @@ retrieve_spend_daily <- function(id, the_date) {
   print("click now")
   insights$clickElement()
   
-  Sys.sleep(1)
+  Sys.sleep(3)
   
   pp <- remDr$getPageSource() %>% .[[1]] %>% read_html()
   
@@ -183,24 +188,33 @@ retrieve_spend_daily <- function(id, the_date) {
   
 }
 
+daily_spending <- readRDS("data/daily_spending.rds")
+
 # 13 February 2023
-timelines <- seq.Date(as.Date("2023-02-13"), as.Date("2023-03-13"), by = "day")
+timelines <- seq.Date(as.Date("2023-02-13"), as.Date("2023-03-14"), by = "day")
 
 daily_spending <- expand_grid(unique(ggl_spend$Advertiser_ID), timelines) %>% 
   set_names(c("advertiser_id", "timelines")) %>% 
   split(1:nrow(.)) %>% 
   map_dfr(~{retrieve_spend_daily(.x$advertiser_id, .x$timelines)})
 
-# daily_spending <- daily_spending %>% 
-#   bind_rows(missings)
+daily_spending <- daily_spending %>%
+  bind_rows(missings) %>%
+  distinct(advertiser_id, date, .keep_all = T)
 
 saveRDS(daily_spending, file = "data/daily_spending.rds")
 
 # retrieve_spend_daily("AR09355418985304162305", "2023-03-01")
 
-# missings <- expand_grid(unique(ggl_spend$Advertiser_ID), timelines) %>% 
-#   set_names(c("advertiser_id", "timelines")) %>% 
-#   anti_join(daily_spending %>% rename(timelines = date))  %>% 
-#   split(1:nrow(.)) %>% 
-#   map_dfr(~{retrieve_spend_daily(.x$advertiser_id, .x$timelines)})
+missings <- expand_grid(unique(ggl_spend$Advertiser_ID), timelines) %>%
+  set_names(c("advertiser_id", "timelines")) %>%
+  anti_join(daily_spending %>% rename(timelines = date))  %>%
+  split(1:nrow(.)) %>%
+  map_dfr_progress(~{retrieve_spend_daily(.x$advertiser_id, .x$timelines)})
+
+retrieve_spend_daily("AR18177962546424709121", "2023-03-14")
+
+
+
+
 

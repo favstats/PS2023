@@ -437,7 +437,7 @@ wk_spend <- read_csv("data/google-political-ads-advertiser-weekly-spend.csv")
 
 ggl_spend <- wk_spend  %>%
     mutate(party1 = case_when(
-        str_detect(Advertiser_Name, "VVD|Volkspartij voor Vrijheid en Democratie") ~ "VVD",
+        str_detect(Advertiser_Name, "VVD|Volkspartij voor Vrijheid en Democratie|Stichting Liberaal Dordrecht") ~ "VVD",
         str_detect(Advertiser_Name, "\\bCDA\\b|Christen Democratisch Appèl") ~ "CDA",
         str_detect(Advertiser_Name, "PvdA|Jonge Socialisten|Partij van de Arbeid") ~ "PvdA",
         str_detect(Advertiser_Name, "\\bD66\\b|Jonge Democraten|Democraten 66") ~ "D66",
@@ -452,7 +452,7 @@ ggl_spend <- wk_spend  %>%
         str_detect(Advertiser_Name, "DENK") ~ "DENK",
         str_detect(Advertiser_Name, "Volt|VOLT") ~ "Volt Nederland",
         str_detect(Advertiser_Name, "BIJ1|BiJ") ~ "BIJ1",
-        str_detect(Advertiser_Name, "BVNL|Belang Van Nederland") ~ "BVNL",
+        str_detect(Advertiser_Name, "BVNL|Belang Van Nederland|Engel Huibert van Dalen") ~ "BVNL",
         str_detect(Advertiser_Name, "Ja21|JA21|Conservatieve Liberalen") ~ "JA21",
         str_detect(Advertiser_Name, "Alliantie") ~ "Alliantie",
         str_detect(Advertiser_Name, "BBB|Marc-Michel Strijker") ~ "BBB",
@@ -462,8 +462,9 @@ ggl_spend <- wk_spend  %>%
     filter(!(str_detect(Advertiser_Name, "Gleichheitspartei|Nieuw-Vlaamse|SP Digital LLC|MURRAY|REVOLT|Angelenos Against Higher Property Taxes|ITALIA|Volt Deutschland"))) %>%
     drop_na(party1) %>%
     mutate(Week_Start_Date = lubridate::ymd(Week_Start_Date)) %>%
-    filter(Week_Start_Date >= as.Date("2023-02-05"))
+    filter(Week_Start_Date >= as.Date("2023-02-01"))
     # count(Week_Start_Date)
+# ggl_spend %>% distinct(Advertiser_Name, .keep_all = T) %>% select(party1, everything()) %>% View
 
 saveRDS(ggl_spend, "data/ggl_spend.rds")
 
@@ -533,6 +534,73 @@ ggl_all <- tt_ads %>%
 
 
 saveRDS(ggl_all, file = "data/ggl_all.rds")
+
+
+
+ggl_sel_sp7 <- readRDS("data/ggl_sel_sp7.rds") %>% 
+  filter(num_ads != "0")
+
+tt_ads <- ggl_sel_sp7 %>%
+  rename(Advertiser_ID = advertiser_id) %>%
+  left_join(ggl_spend %>% distinct(Advertiser_ID, party1))  %>%
+  # mutate(Date_Range_Start = lubridate::ymd(Date_Range_Start)) %>%
+  # filter(Date_Range_Start >= as.Date("2023-02-05")) %>%
+  group_by(party1) %>%
+  summarize(total_num_ads = sum(as.numeric(num_ads))) %>%
+  # count(party1, name = "total_num_ads") %>%
+  mutate(total_num_ads = scales::comma(total_num_ads)) %>%
+  pivot_wider(names_from = party1, values_from = total_num_ads) %>%
+  mutate(`Coalizione/Partito` = "Number of Ads")
+
+
+ttl_spn <- ggl_sel_sp7 %>%
+  rename(Advertiser_ID = advertiser_id) %>%
+  left_join(ggl_spend %>% distinct(Advertiser_ID, party1)) %>%
+  mutate(Spend_EUR = readr::parse_number(str_remove(eur_amount, "\\."))) %>%
+  group_by(party1) %>%
+  summarize(Spend_EUR = sum(Spend_EUR)) %>%
+  arrange(desc(Spend_EUR)) %>%
+  select(party = party1, spend = Spend_EUR) %>%
+  mutate(spend = scales::comma(spend)) %>%
+  mutate(spend = paste0("€", spend)) %>%
+  drop_na() %>%
+  pivot_wider(names_from = party, values_from = spend) %>%
+  mutate(`Coalizione/Partito` = "Total Spend")
+
+
+
+tp_spnders <- ggl_sel_sp7 %>%
+  rename(Advertiser_ID = advertiser_id) %>%
+  left_join(ggl_spend %>% distinct(Advertiser_ID, party1, .keep_all = T) %>% select(Advertiser_ID, party1, Advertiser_Name)) %>%
+  mutate(Spend_EUR = readr::parse_number(str_remove(eur_amount, "\\.")))   %>%
+  group_by(Advertiser_Name, party1) %>%
+  summarize(Spend_EUR = sum(Spend_EUR)) %>%
+  ungroup() %>%
+  group_by(party1) %>%
+  arrange(desc(Spend_EUR)) %>%
+  slice(1:3) %>%
+  mutate(Spend_EUR = scales::comma(Spend_EUR)) %>%
+  mutate(n_words = str_count(Advertiser_Name, " ")) %>%
+  # mutate(lab = paste0(word(str_remove(page_name, "-"), 1,ifelse(n_words>=2, 3, 2), sep=" "), "<br>(€", total_spend_formatted, ")")) %>%
+  mutate(lab = paste0(Advertiser_Name, " (€", Spend_EUR, ")")) %>%
+  select(party1, lab) %>%
+  drop_na() %>%
+  summarize(lab = paste0("<br>", 1:n(), ". ", lab, collapse = "")) %>%
+  pivot_wider(names_from = party1, values_from = lab) %>%
+  mutate(`Coalizione/Partito` = "Top Spenders")
+
+ggl_all7 <- tt_ads %>%
+  bind_rows(tp_spnders) %>%
+  bind_rows(ttl_spn) %>%
+  t() %>%
+  as.data.frame() %>%
+  rownames_to_column("Coalizione/Partito") %>%
+  set_names(.[nrow(.),] %>% as.character()) %>%
+  slice(1:(n()-1))
+
+
+saveRDS(ggl_all7, file = "data/ggl_all7.rds")
+
 
 
 
