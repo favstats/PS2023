@@ -232,7 +232,7 @@ all_dat <- #read_csv("nl_advertisers.csv") %>%
         T ~ party
     ))
 
-# all_dat %>% filter(source == "new") %>% View
+all_dat %>% filter(source == "new") %>% View
 
 
 # all_dat %>%
@@ -387,7 +387,9 @@ da30  <- dir("provincies/30", full.names = T) %>%
 # da30 %>%
 #     count(party, sort = T) %>% View
 
-da30 %>% count(party)
+da30 %>% count(ds)
+da7 %>% count(ds)
+
 da7  <- dir("provincies/7", full.names = T) %>%
     map_dfr_progress(readRDS) %>%
     mutate(total_spend_formatted = parse_number(total_spend_formatted)) %>%

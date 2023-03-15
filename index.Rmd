@@ -475,6 +475,21 @@ ggl_spend <- readRDS("data/ggl_spend.rds")
     labs(y = "Daily Spend in Euro", x = "Day")
 
 # plotly::ggplotly(ht)
+ 
+ 
+  # ggl_daily %>%
+  #   rename(Advertiser_ID = advertiser_id) %>%
+  #   left_join(ggl_spend %>% distinct(Advertiser_ID, party1)) %>% 
+  #   janitor::clean_names()  %>% 
+  #   rename(party = party1) %>% 
+  #   mutate(date_produced = lubridate::ymd(date)) %>%
+  #   mutate(spend = readr::parse_number(str_remove(eur_amount, "\\."))) %>%  
+  #   group_by(date_produced, party) %>% 
+  #   summarize(spend  = sum(spend)) %>% 
+  #   ungroup() %>% 
+  #  mutate(party = ifelse(party == "JA21", "Ja21", party)) %>% 
+  #   group_by(party) %>% 
+  #   summarize(spend = sum(spend))
 ```
 
 For Google platforms, data accessed via the [Google Transparency Report](https://transparencyreport.google.com/political-ads/region/NL) provides exact spending on how much money was spent by parties in last 30 days. The table below shows spending in the timerange between **February 12th to March 13th 2023**.
