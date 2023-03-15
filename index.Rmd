@@ -719,7 +719,7 @@ sum7_ggl <- ggl_all7 %>%
 ```
 
 
-#### Daily Spen
+#### Daily Spend
 
 ```{r}
 
