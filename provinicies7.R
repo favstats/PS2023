@@ -387,8 +387,6 @@ da30  <- dir("provincies/30", full.names = T) %>%
 # da30 %>%
 #     count(party, sort = T) %>% View
 
-da30 %>% count(ds)
-da7 %>% count(ds)
 
 da7  <- dir("provincies/7", full.names = T) %>%
     map_dfr_progress(readRDS) %>%
@@ -400,6 +398,8 @@ saveRDS(da30, "data/election_dat30.rds")
 saveRDS(da7, "data/election_dat7.rds")
 
 
+da30 %>% count(ds)
+da7 %>% count(ds)
 
 # bbb %>% filter(str_detect(funding_, "Strijker"))
 
@@ -787,3 +787,259 @@ fb_aggr %>%
              trans_internal = trans,
              last_updated = update_time, minmax = "Minimum"
   )
+
+
+total_spend_id <- election_dat30 %>% 
+  distinct(internal_id, .keep_all = T) %>% 
+  group_by(party) %>% 
+  summarize(spend = sum(total_spend_formatted)) %>% 
+  ungroup() %>% 
+  mutate(platform = "Meta")
+  
+
+
+hc_data <-  ggl_daily %>%
+  rename(Advertiser_ID = advertiser_id) %>%
+  left_join(ggl_spend %>% distinct(Advertiser_ID, party1)) %>% 
+  janitor::clean_names()  %>% 
+  rename(party = party1) %>% 
+  mutate(date_produced = lubridate::ymd(date)) %>%
+  mutate(spend = readr::parse_number(str_remove(eur_amount, "\\."))) %>%  
+  group_by(date_produced, party) %>% 
+  summarize(spend  = sum(spend)) %>% 
+  ungroup() %>% 
+  mutate(party = ifelse(party == "JA21", "Ja21", party))  %>%
+  group_by(party) %>%
+  mutate(total_spend = max(spend)) %>%
+  ungroup()  %>%
+  left_join(color_dat, by = "party") %>%
+  mutate(party = as.factor(party)) %>% 
+  mutate(party = fct_reorder(party, total_spend)) %>% 
+  filter(date_produced >= as.Date("2023-02-11") & date_produced <= as.Date("2023-03-12")) %>% 
+  group_by(party) %>% 
+  summarize(spend = sum(spend)) %>% 
+  ungroup() %>% 
+  mutate(platform = "Google")
+
+
+
+platform_dat <- hc_data %>% 
+  bind_rows(total_spend_id) %>% 
+  group_by(party) %>% 
+  mutate(total = sum(spend)) %>% 
+  mutate(perc = spend/total)
+
+lab_dat <- platform_dat %>% 
+  distinct(party, .keep_all = T) %>%
+  # filter(party == "VVD") %>% 
+  mutate(labb = paste0("€", scales::comma(round(total)))) %>% 
+  select(party, labb)
+
+the_order <- platform_dat %>% 
+  filter(platform == "Meta") %>%   arrange(desc(perc)) %>% 
+  pull(party) %>% 
+  unique()
+
+
+platform_dat %>% 
+  # mutate(party = fct_reorder(party, total)) %>% 
+  left_join(lab_dat) %>% 
+  mutate(party = factor(party, the_order)) %>% 
+  mutate(platform = factor(platform, c("Meta", "Google"))) %>% 
+  drop_na(party) %>% 
+  ggplot(aes(party, perc))  +
+  geom_col(aes(fill = platform), position = position_stack(reverse = T), alpha = 0.8) +
+  coord_flip() +
+  geom_label(aes(label = labb),y=1.225,
+             position = position_stack(vjust = 0.5),
+             hjust = 1, label.size = NA,
+             size = 4) + expand_limits(y = 1.2) +
+  geom_hline(yintercept = 0.5, linetype = "dashed") +
+  scale_y_continuous(labels = scales::percent, breaks = c(0, 0.25, 0.5, 0.75, 1)) +
+  scale_fill_manual("Platform", values = c("#ff2700", "#008fd5") %>% rev) +
+  ggthemes::theme_hc() +
+  labs(x = "", y = "% of budget spent on Platform", title = "Meta vs. Google", subtitle = "Where do Dutch parties focus their money?", 
+       caption = "Source: Meta Ad Library, Google Transparency Report & data compiled by Who Targets Me.\nData Viz: Fabio Votta (@favstats). Timeframe: 11th Feb - 12th Mar 2023.") +
+  theme(legend.position = "bottom", plot.title = element_text(size = 20, face = "bold", hjust = 0.35), text=element_text(family="mono", face = "bold"), 
+        plot.caption = element_text(size = 8)) +
+  guides(fill=guide_legend(nrow=1,byrow=TRUE)) 
+  
+ggsave("img/ggl_vs_meta.png", width = 6, height = 8, dpi = 300)
+
+
+
+platform_dat %>% 
+  distinct(party, .keep_all = T) %>%
+  ungroup() %>% 
+  mutate(party = fct_reorder(party, total)) %>% 
+  ggplot(aes(party, total)) +
+  geom_col(aes(fill = party)) +
+  coord_flip() +
+  scale_fill_parties()  +
+  ggthemes::theme_hc() +
+  theme(legend.position = "none", plot.subtitle = element_text(size = 9, hjust = 0.3), 
+        plot.title = element_text(size = 15, face = "bold", hjust = 0.35), text=element_text(family="mono", face = "bold", size = 9), 
+        plot.caption = element_text(size = 5))  +
+  labs(x = "", y = "Total Budget on Google (incl. YouTube) & Meta (Facebook & Instagram) ads", title = "Digital Campaigning in the Netherlands", subtitle = "How much did Dutch parties spend on Meta & Google during Provincial Elections?", 
+       caption = "Source: Meta Ad Library, Google Transparency Report & data compiled by Who Targets Me.\nData Viz: Fabio Votta (@favstats). Timeframe: 11th Feb - 12th Mar 2023.")  +
+  geom_text(aes(label = paste0("€",scales::comma_format()(total))),#y=1.225,
+             # position = position_stack(vjust = 0.5),
+             hjust = 1.15, label.size = NA, color = "white",
+             size = 3) 
+  
+ggsave("img/total_spend.png", width = 8, height = 5, dpi = 300)
+
+platform_dat %>% 
+  # mutate(party = fct_reorder(party, total)) %>% 
+  left_join(lab_dat) %>% 
+  mutate(party = factor(party, the_order)) %>% 
+  mutate(platform = factor(platform, c("Meta", "Google"))) %>% 
+  drop_na(platform) %>% 
+  group_by(platform) %>% 
+  summarize(total = sum(spend)) 
+268150/600873
+
+
+totalgoogle <- 268150
+
+
+more_data_ggl <- ggl_daily %>%
+  rename(Advertiser_ID = advertiser_id) %>%
+  left_join(ggl_spend %>% distinct(Advertiser_ID, party1)) %>% 
+  janitor::clean_names()  %>% 
+  rename(party = party1) %>% 
+  mutate(date_produced = lubridate::ymd(date)) %>%
+  mutate(spend = readr::parse_number(str_remove(eur_amount, "\\."))) %>%  
+  group_by(date_produced, party) %>% 
+  summarize(spend  = sum(spend)) %>% 
+  ungroup() %>% 
+  mutate(party = ifelse(party == "JA21", "Ja21", party))  %>%
+  group_by(party) %>%
+  mutate(total_spend = max(spend)) %>%
+  ungroup()  %>%
+  left_join(color_dat, by = "party") %>%
+  mutate(party = as.factor(party)) %>% 
+  mutate(party = fct_reorder(party, total_spend)) %>% 
+  filter(date_produced >= as.Date("2023-02-11") & date_produced <= as.Date("2023-03-12"))# %>% 
+  # summarise(spend =sum(spend))
+
+
+more_data <- dir("data/reports", full.names = T) %>% 
+  map_dfr(~read_csv(.x) %>% mutate(path = .x)) %>% 
+  mutate(date_produced = str_remove_all(path, "data/reports/FacebookAdLibraryReport_|_NL_yesterday_advertisers\\.csv")) %>% 
+  mutate(date_produced = lubridate::ymd(date_produced)) %>% 
+  janitor::clean_names()%>% rename(advertiser_id = page_id) %>% 
+  mutate(spend = readr::parse_number(amount_spent_eur)) %>% 
+  bind_rows(nlsb %>% 
+              janitor::clean_names() ) %>% 
+  mutate(spend = ifelse(spend == 100, 50, spend))%>% 
+  filter(date_produced >= as.Date("2023-02-13"))  %>% 
+  # mutate(advertiser_id = as.character(advertiser_id)) %>% 
+  left_join(nl_advertisers %>% rename(advertiser_id = page_id) %>% 
+              select(advertiser_id, party)) %>% 
+  drop_na(party)
+
+
+
+platform_dat_daily <- more_data_ggl %>% 
+  mutate(platform = "Google") %>% 
+bind_rows(more_data%>% 
+            mutate(platform = "Meta")) %>% 
+group_by(party) %>% 
+mutate(total = sum(spend)) %>% 
+mutate(perc = spend/total) %>% 
+  ungroup()
+
+
+platform_dat_daily %>% 
+  group_by(party, date_produced) %>% 
+  summarize(spend = sum(spend)) %>% 
+  ungroup() %>% 
+  drop_na(party) %>% 
+  mutate(party = fct_reorder(party, spend, .fun = sum)) %>% 
+  ggplot(aes(date_produced, spend)) +
+  geom_area(position = position_stack(), aes(fill = party), alpha = 0.85) +
+  scale_fill_parties() +
+  ggthemes::theme_hc() +
+  labs(x = "", y = "Daily Budget on Meta and Google Ads", title = "Daily Spending in 2023 Provincial Elections", subtitle = "How much did Dutch parties spend on Meta & Google during Provincial Elections?", 
+       caption = "Source: Meta Ad Library, Google Transparency Report & data compiled by Who Targets Me.\nData Viz: Fabio Votta (@favstats). Timeframe: 13th Feb - 12th Mar 2023.") +
+  theme(legend.position = "bottom", plot.subtitle = element_text(size = 15, hjust = 0.35),
+        plot.title = element_text(size = 28, face = "bold", hjust = 0.35), text=element_text(family="mono", face = "bold"), 
+        plot.caption = element_text(size = 8)) +
+  guides(fill=guide_legend(nrow=2,byrow=TRUE, reverse = T)) +
+  scale_x_date(date_breaks = "4 days", date_labels = "%b %d") +
+  geom_vline(xintercept = as.Date("2023-03-06"), linetype = "dashed") +
+  annotate(geom = "label", label = "57.77% of total budget spend after March 6th", x = as.Date("2023-03-02"), y = 125000, size = 4)
+
+ggsave("img/daily_spend.png", width = 12, height = 8, dpi = 300)
+
+
+total_spend <- platform_dat_daily %>% 
+  # group_by(party, date_produced) %>% 
+  # summarize(spend = sum(spend)) %>% 
+  ungroup() %>%
+  drop_na(party)  %>% #View
+  summarise(spend = sum(spend))
+
+last_7_days <- platform_dat_daily %>% 
+  filter(date_produced >= as.Date("2023-03-06")) %>% 
+  # group_by(party, date_produced) %>% 
+  # summarize(spend = sum(spend)) %>% 
+  ungroup() %>%
+  drop_na(party)  %>% #View
+  summarise(spend = sum(spend))
+
+last_7_days$spend/total_spend$spend*100
+
+
+
+total_budget <- rvest::read_html("https://www.rtlnieuws.nl/nieuws/politiek/artikel/5357473/partijen-geven-kwart-meer-uit-aan-campagne-provinciale") %>% 
+  rvest::html_table() %>% 
+  .[[1]] %>% 
+  set_names(.[1,] %>% as.character) %>% 
+  slice(-1) %>% 
+  janitor::clean_names() %>% 
+  mutate(budget_ps_2023 = ifelse(partij == "PvdA", budget_ps_2019, budget_ps_2023)) %>% 
+  mutate(budget_ps_2023 = str_remove_all(budget_ps_2023, "\\.")) %>% 
+  mutate(budget_ps_2023  = readr::parse_number(budget_ps_2023)) %>% 
+  rename(party = partij)
+
+digital_budget <- platform_dat %>% 
+  # mutate(party = fct_reorder(party, total)) %>% 
+  left_join(lab_dat) %>% 
+  # mutate(party = factor(party, the_order)) %>% 
+  # filter(is.na(party))
+  mutate(platform = factor(platform, c("Meta", "Google"))) %>% 
+  drop_na(platform) %>% 
+  group_by(party) %>% 
+  summarize(spend_digital = sum(spend)) 
+
+total_budget %>% 
+  mutate(party = case_when(
+    party == "Partij voor de Dieren" ~ "PvdD",
+    party == "Volt" ~ "Volt Nederland",
+    party == "Van Haga/bvNL" ~ "BVNL",
+    T ~ party
+  )) %>% 
+  left_join(digital_budget) %>% 
+  mutate(perc = spend_digital/budget_ps_2023*100) %>% 
+  arrange(desc(perc))  %>% 
+  mutate(party = fct_reorder(party, perc)) %>% 
+  ggplot(aes(party, perc)) +
+  geom_col(aes(fill = party)) +
+  coord_flip() +
+  scale_fill_parties()  +
+  ggthemes::theme_hc() +
+  theme(legend.position = "none", plot.subtitle = element_text(size = 8, hjust = 0.3), 
+        plot.title = element_text(size = 13, face = "bold", hjust = 0.35), text=element_text(family="mono", face = "bold", size = 9), 
+        plot.caption = element_text(size = 5))  +
+  labs(x = "", y = "% of Total Budget Spend on Google (incl. YouTube) & Meta (Facebook & Instagram) ads", title = "Digital Campaigning in the 2023 Dutch Provincial Elections", subtitle = "How much did Dutch parties spend on digital ads compared to their total campaign budget?", 
+       caption = "Source: Meta Ad Library, Google Transparency Report, RTL Nieuws & data compiled by Who Targets Me.\nData Viz: Fabio Votta (@favstats). Timeframe: 11th Feb - 12th Mar 2023.")  +
+  geom_text(aes(label = round(perc)),#y=1.225,
+            # position = position_stack(vjust = 0.5),
+            hjust = 1.45, label.size = NA, color = "white",
+            size = 3) +
+  annotate(geom = "text", label = "No Numbers on Total Budget", x = 15.5, y = 5, size = 3)+
+  annotate(geom = "label", label = "*2019 Budget", x = 13, y = 55, size = 3, label.size = NA)
+
+ggsave("img/digital_spend.png", width = 8, height = 5, dpi = 300)

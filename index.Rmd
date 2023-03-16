@@ -1185,11 +1185,29 @@ contested_dat7 <- interest_targeting7 %>%
 
 ```
 
-```{r}
-# contested_dat30 %>% 
-#     filter(party == "PvdD") %>%
-#     filter(str_detect(value, "Butch"))
-#     arrange(desc(perc))
+```{r,fig.width=12, fig.height=8,eval=F}
+ interest_targeting30 %>% 
+  filter(!is_exclusion) %>% 
+  # filter(total_spend >= 40000) %>% 
+  filter(total_spend >= 1) %>%
+  # add_count(value) %>% 
+  # filter(n >= 5) %>% 
+  group_by(party) %>% 
+  mutate(total_spenderino = sum(total_spend)) %>% 
+  mutate(perc = total_spend/total_spenderino)  %>%
+    filter(party == "BBB") %>%
+    slice(1:30) %>%
+  mutate(value = fct_reorder(value, total_spend)) %>% 
+  ggplot(aes(value, total_spend)) +
+  geom_col(aes(fill = party)) +
+  coord_flip() +
+  scale_fill_parties() +
+  ggthemes::theme_hc() +
+  ggthemes::theme_hc() +
+  labs(x = "Targeting criteria", y = "Budget spent on targeting method (in Euro)", title = "Top Targeted Audiences by BBB", subtitle = " ", 
+       caption = "Source: Meta Ad Library and data compiled by Who Targets Me.\nData Viz: Fabio Votta (@favstats).") +
+  theme(plot.title = element_text(size = 28, face = "bold", hjust = 0.5), text=element_text(family="mono", face = "bold"), plot.caption = element_text()) +
+  theme(legend.position = "none")
 ```
 
 
@@ -1974,6 +1992,8 @@ all_zip  %>%
     theme(legend.position = "none") +
     labs(caption = "Data: Meta Ad Library; CBS. Data Viz: @favstats")
 ```
+
+
 
 ```{r, fig.width=5, fig.height=2, dpi = 900, eval = F}
 
