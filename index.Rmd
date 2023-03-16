@@ -154,6 +154,13 @@ source("utils.R")
 #     openxlsx::write.xlsx("topspenders28thFeb.xlsx")
 ```
 
+```{r, eval = F}
+election_dat30 %>% 
+  filter(is_exclusion) %>% 
+  # filter(party == "PvdA") %>% 
+  arrange(desc(total_spend_pct))
+  count(party, sort =T)
+```
 
 
 ## Methodology
@@ -168,7 +175,6 @@ To better understand the regional election, we kept only advertisers who:
 > Note: Meta only provides 7, 30 and 90 days windows for the targeting data in their Ad Library. Meta's data also lags by a few days. We will update this report as soon as new data is available.
 
 ## Topline Statistics  {.tabset .tabset-fade .tabset-pills}
-
 
 ### Meta {.tabset .tabset-fade .tabset-pills}
 
@@ -348,7 +354,7 @@ add_ribbons2 <- function(x, adv, col) {
 
 
 
-```{r}
+```{r, out.width="100%"}
 # more_data %>% 
 #   mutate(under100 = spend == 50)  %>% 
 #     left_join(nl_advertisers %>% rename(advertiser_id = page_id) %>% 
@@ -721,7 +727,7 @@ sum7_ggl <- ggl_all7 %>%
 
 #### Daily Spend
 
-```{r}
+```{r, out.width="100%"}
 
 
 
@@ -780,7 +786,7 @@ hc_data %>%
 ```
 
 
-#### Feb 13th to Mar 14th 2023 (Last 30 days)
+#### Feb 14th to Mar 15th 2023 (Last 30 days)
 
 
 In total, political parties spend €`r scales::comma_format()(sum30_ggl$total_spend_formatted)` and ran `r sum30_ggl$total_num_ads` ad copies on Google in this timeframe.
@@ -819,7 +825,7 @@ ggl_all %>%
     add_ribbons2("Volt Nederland", "#582c83")
 ```
 
-#### Mar 8th to 14th 2023 (Last 7 days)
+#### Mar 9th to 15th 2023 (Last 7 days)
 
 In total, political parties spend €`r scales::comma_format()(sum7_ggl$total_spend_formatted)` and ran `r sum7_ggl$total_num_ads` ad copies on Google in this timeframe.
 
@@ -856,6 +862,26 @@ ggl_all7 %>%
     add_ribbons2("BBB", "#698c0c") %>%
     add_ribbons2("Volt Nederland", "#582c83")
 ```
+
+### Combined Stats {.tabset .tabset-fade .tabset-pills}
+
+#### Daily Spend
+
+![](img/daily_spend.png)
+
+#### Total Spend
+
+![](img/total_spend.png)
+
+#### Digital Ads as Percentage of Total Budget
+
+![](img/digital_spend.png)
+
+#### Meta vs. Google 
+
+![](img/ggl_vs_meta.png)
+
+
 
 
 ## Spending per Targeting Criteria {.tabset .tabset-fade .tabset-pills}
@@ -1185,9 +1211,10 @@ contested_dat7 <- interest_targeting7 %>%
 
 ```
 
-```{r,fig.width=12, fig.height=8,eval=F}
+```{r,fig.width=9, fig.height=5,eval=F, dpi = 300}
+library(tidytext)
  interest_targeting30 %>% 
-  filter(!is_exclusion) %>% 
+  filter(is_exclusion) %>% 
   # filter(total_spend >= 40000) %>% 
   filter(total_spend >= 1) %>%
   # add_count(value) %>% 
@@ -1195,19 +1222,22 @@ contested_dat7 <- interest_targeting7 %>%
   group_by(party) %>% 
   mutate(total_spenderino = sum(total_spend)) %>% 
   mutate(perc = total_spend/total_spenderino)  %>%
-    filter(party == "BBB") %>%
-    slice(1:30) %>%
-  mutate(value = fct_reorder(value, total_spend)) %>% 
+    mutate(value = reorder_within(value, total_spend, party)) %>% 
+    # filter(party == "BBB") %>%
+    # slice(1:30) %>%
+  # mutate(value = fct_reorder(value, total_spend)) %>% 
   ggplot(aes(value, total_spend)) +
-  geom_col(aes(fill = party)) +
+  geom_col(aes(fill = party), width = 0.29) +
   coord_flip() +
   scale_fill_parties() +
+  
+    scale_x_reordered()  +
   ggthemes::theme_hc() +
-  ggthemes::theme_hc() +
-  labs(x = "Targeting criteria", y = "Budget spent on targeting method (in Euro)", title = "Top Targeted Audiences by BBB", subtitle = " ", 
-       caption = "Source: Meta Ad Library and data compiled by Who Targets Me.\nData Viz: Fabio Votta (@favstats).") +
-  theme(plot.title = element_text(size = 28, face = "bold", hjust = 0.5), text=element_text(family="mono", face = "bold"), plot.caption = element_text()) +
-  theme(legend.position = "none")
+  labs(x = "Exclusion criteria\n", y = "Budget spent on targeting method (in Euro)", title = "Top Excluded Audiences by Party", subtitle = "On Meta you can exclude audiences that you don't want to see your ads\n", 
+       caption = "\nSource: Meta Ad Library and data compiled by Who Targets Me. Data Viz: Fabio Votta (@favstats).  Timeframe: 12th Feb - 13th Mar 2023.") +
+  theme(plot.title = element_text(size = 38, face = "bold", hjust = 0.5), text=element_text(family="mono", face = "bold"), plot.caption = element_text(), plot.subtitle = element_text(hjust = 0.5, size = 20)) +
+  theme(legend.position = "none") +
+  facet_wrap(~party, scales = "free")
 ```
 
 
@@ -1900,10 +1930,12 @@ The following maps show ZIP code targeting for a few parties that spend a lot on
 ```
 
 ```{r}
-
+# ad
 library(geojsonsf)
-prov <- geojson_sf("https://www.webuildinternet.com/articles/2015-07-19-geojson-data-of-the-netherlands/provinces.geojson")
+# prov <- geojson_sf("https://www.webuildinternet.com/articles/2015-07-19-geojson-data-of-the-netherlands/provinces.geojson")
 
+# saveRDS(prov, "data/prov.rds")
+prov <- readRDS("data/prov.rds")
 ```
 
 ```{r, fig.width=5, fig.height=2, dpi = 900}

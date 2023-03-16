@@ -815,7 +815,7 @@ hc_data <-  ggl_daily %>%
   left_join(color_dat, by = "party") %>%
   mutate(party = as.factor(party)) %>% 
   mutate(party = fct_reorder(party, total_spend)) %>% 
-  filter(date_produced >= as.Date("2023-02-11") & date_produced <= as.Date("2023-03-12")) %>% 
+  filter(date_produced >= as.Date("2023-02-11") & date_produced <= as.Date("2023-03-13")) %>% 
   group_by(party) %>% 
   summarize(spend = sum(spend)) %>% 
   ungroup() %>% 
@@ -859,7 +859,7 @@ platform_dat %>%
   scale_fill_manual("Platform", values = c("#ff2700", "#008fd5") %>% rev) +
   ggthemes::theme_hc() +
   labs(x = "", y = "% of budget spent on Platform", title = "Meta vs. Google", subtitle = "Where do Dutch parties focus their money?", 
-       caption = "Source: Meta Ad Library, Google Transparency Report & data compiled by Who Targets Me.\nData Viz: Fabio Votta (@favstats). Timeframe: 11th Feb - 12th Mar 2023.") +
+       caption = "Source: Meta Ad Library, Google Transparency Report & data compiled by Who Targets Me.\nData Viz: Fabio Votta (@favstats). Timeframe: 12th Feb - 13th Mar 2023.") +
   theme(legend.position = "bottom", plot.title = element_text(size = 20, face = "bold", hjust = 0.35), text=element_text(family="mono", face = "bold"), 
         plot.caption = element_text(size = 8)) +
   guides(fill=guide_legend(nrow=1,byrow=TRUE)) 
@@ -889,7 +889,7 @@ platform_dat %>%
   
 ggsave("img/total_spend.png", width = 8, height = 5, dpi = 300)
 
-platform_dat %>% 
+platformsum <- platform_dat %>% 
   # mutate(party = fct_reorder(party, total)) %>% 
   left_join(lab_dat) %>% 
   mutate(party = factor(party, the_order)) %>% 
@@ -897,7 +897,7 @@ platform_dat %>%
   drop_na(platform) %>% 
   group_by(platform) %>% 
   summarize(total = sum(spend)) 
-268150/600873
+platformsum$total[1]/sum(platformsum$total)
 
 
 totalgoogle <- 268150
@@ -920,7 +920,7 @@ more_data_ggl <- ggl_daily %>%
   left_join(color_dat, by = "party") %>%
   mutate(party = as.factor(party)) %>% 
   mutate(party = fct_reorder(party, total_spend)) %>% 
-  filter(date_produced >= as.Date("2023-02-11") & date_produced <= as.Date("2023-03-12"))# %>% 
+  filter(date_produced >= as.Date("2023-02-11") & date_produced <= as.Date("2023-03-13"))# %>% 
   # summarise(spend =sum(spend))
 
 
@@ -950,6 +950,23 @@ mutate(total = sum(spend)) %>%
 mutate(perc = spend/total) %>% 
   ungroup()
 
+total_spend <- platform_dat_daily %>% 
+  # group_by(party, date_produced) %>% 
+  # summarize(spend = sum(spend)) %>% 
+  ungroup() %>%
+  drop_na(party)  %>% #View
+  summarise(spend = sum(spend))
+
+last_7_days <- platform_dat_daily %>% 
+  filter(date_produced >= as.Date("2023-03-06")) %>% 
+  # group_by(party, date_produced) %>% 
+  # summarize(spend = sum(spend)) %>% 
+  ungroup() %>%
+  drop_na(party)  %>% #View
+  summarise(spend = sum(spend))
+
+after6 <- round(last_7_days$spend/total_spend$spend*100, 2)
+
 
 platform_dat_daily %>% 
   group_by(party, date_produced) %>% 
@@ -969,27 +986,12 @@ platform_dat_daily %>%
   guides(fill=guide_legend(nrow=2,byrow=TRUE, reverse = T)) +
   scale_x_date(date_breaks = "4 days", date_labels = "%b %d") +
   geom_vline(xintercept = as.Date("2023-03-06"), linetype = "dashed") +
-  annotate(geom = "label", label = "57.77% of total budget spend after March 6th", x = as.Date("2023-03-02"), y = 125000, size = 4)
+  annotate(geom = "label", label = glue::glue("{after6}% of total budget spend after March 6th"), x = as.Date("2023-03-02"), y = 125000, size = 4)
 
 ggsave("img/daily_spend.png", width = 12, height = 8, dpi = 300)
 
 
-total_spend <- platform_dat_daily %>% 
-  # group_by(party, date_produced) %>% 
-  # summarize(spend = sum(spend)) %>% 
-  ungroup() %>%
-  drop_na(party)  %>% #View
-  summarise(spend = sum(spend))
 
-last_7_days <- platform_dat_daily %>% 
-  filter(date_produced >= as.Date("2023-03-06")) %>% 
-  # group_by(party, date_produced) %>% 
-  # summarize(spend = sum(spend)) %>% 
-  ungroup() %>%
-  drop_na(party)  %>% #View
-  summarise(spend = sum(spend))
-
-last_7_days$spend/total_spend$spend*100
 
 
 
@@ -1039,7 +1041,7 @@ total_budget %>%
             # position = position_stack(vjust = 0.5),
             hjust = 1.45, label.size = NA, color = "white",
             size = 3) +
-  annotate(geom = "text", label = "No Numbers on Total Budget", x = 15.5, y = 5, size = 3)+
-  annotate(geom = "label", label = "*2019 Budget", x = 13, y = 55, size = 3, label.size = NA)
+  annotate(geom = "text", label = "No Numbers on Total Budget", x = 15.5, y = 8, size = 3)+
+  annotate(geom = "label", label = "*2019 Budget", x = 13, y = 65, size = 3, label.size = NA)
 
 ggsave("img/digital_spend.png", width = 8, height = 5, dpi = 300)

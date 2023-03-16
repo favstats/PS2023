@@ -62,7 +62,7 @@ retrieve_spend <- function(id, days = 30) {
     print("click now")
     insights$clickElement()
 
-    Sys.sleep(1)
+    Sys.sleep(3)
 
     pp <- remDr$getPageSource() %>% .[[1]] %>% read_html()
     
@@ -191,18 +191,18 @@ retrieve_spend_daily <- function(id, the_date) {
 daily_spending <- readRDS("data/daily_spending.rds")
 
 # 13 February 2023
-timelines <- seq.Date(as.Date("2023-02-13"), as.Date("2023-03-14"), by = "day")
+timelines <- seq.Date(as.Date("2023-02-13"), as.Date("2023-03-15"), by = "day")
 
-daily_spending <- expand_grid(unique(ggl_spend$Advertiser_ID), timelines) %>%
-  set_names(c("advertiser_id", "timelines")) %>%
-  split(1:nrow(.)) %>%
-  map_dfr(~{retrieve_spend_daily(.x$advertiser_id, .x$timelines)})
+# daily_spending <- expand_grid(unique(ggl_spend$Advertiser_ID), timelines) %>%
+#   set_names(c("advertiser_id", "timelines")) %>%
+#   split(1:nrow(.)) %>%
+#   map_dfr(~{retrieve_spend_daily(.x$advertiser_id, .x$timelines)})
+# 
+# daily_spending <- daily_spending %>%
+#   bind_rows(missings) %>%
+#   distinct(advertiser_id, date, .keep_all = T)
 
-daily_spending <- daily_spending %>%
-  bind_rows(missings) %>%
-  distinct(advertiser_id, date, .keep_all = T)
-
-saveRDS(daily_spending, file = "data/daily_spending.rds")
+# saveRDS(daily_spending, file = "data/daily_spending.rds")
 
 # retrieve_spend_daily("AR09355418985304162305", "2023-03-01")
 
@@ -212,7 +212,7 @@ missings <- expand_grid(unique(ggl_spend$Advertiser_ID), timelines) %>%
   split(1:nrow(.)) %>%
   map_dfr_progress(~{retrieve_spend_daily(.x$advertiser_id, .x$timelines)})
 
-retrieve_spend_daily("AR18177962546424709121", "2023-03-14")
+# retrieve_spend_daily("AR18177962546424709121", "2023-03-14")
 
 
 

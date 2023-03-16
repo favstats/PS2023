@@ -172,7 +172,7 @@ To better understand the regional election, we kept only advertisers who:
 
 ### Meta {.tabset .tabset-fade .tabset-pills}
 
-```{r}
+```{r, out.width="100%"}
 hc_data <- readRDS("data/hc_data.rds")
 
 color_order <- hc_data %>% 
@@ -210,7 +210,7 @@ hc_data %>%
   hc_tooltip(
     shared = TRUE,
     positioner = JS("function (labelWidth, labelHeight, point) {
-        return { x: 20, y: this.chart.plotTop };
+        return { x: 200, y: this.chart.plotTop };
     }")
   ) 
 ```
