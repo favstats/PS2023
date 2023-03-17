@@ -818,7 +818,7 @@ ggl_all %>%
     add_ribbons2("BVNL", "#242b57") %>%
     add_ribbons2("DENK", "#66cdaa") %>%
     add_ribbons2("JA21", "#242b57") %>%
-    # add_ribbons("PvdD", "#006b28") %>%
+    add_ribbons2("PvdD", "#006b28") %>%
     # add_ribbons("PVV", "#012758") %>%
     # add_ribbons("SGP", "#ea5b0b") %>%
     add_ribbons2("BBB", "#698c0c") %>%
@@ -856,7 +856,7 @@ ggl_all7 %>%
     add_ribbons2("BVNL", "#242b57") %>%
     add_ribbons2("DENK", "#66cdaa") %>%
     add_ribbons2("JA21", "#242b57") %>%
-    # add_ribbons("PvdD", "#006b28") %>%
+    add_ribbons2("PvdD", "#006b28") %>%
     # add_ribbons("PVV", "#012758") %>%
     # add_ribbons("SGP", "#ea5b0b") %>%
     add_ribbons2("BBB", "#698c0c") %>%

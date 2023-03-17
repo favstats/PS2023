@@ -617,9 +617,9 @@ all_ads %>%
   group_by(party1) %>% 
   mutate(total = sum(Spend_Range_Max_EUR)) %>% 
   mutate(perc = Spend_Range_Max_EUR/total) %>% 
-  ungroup() %>% 
+  ungroup() %>% View
   # arrange(desc(Spend_Range_Max_EUR)) %>% View
-  # count(Age_Targeting, sort = T) %>% View
+  count(Gender_Targeting, sort = T) %>% View
   count(Geo_Targeting_Included, sort = T) %>%
   slice()
   # sample_n(5) %>% dput()
@@ -788,7 +788,7 @@ fb_aggr %>%
              last_updated = update_time, minmax = "Minimum"
   )
 
-
+library(tidyverse)
 total_spend_id <- election_dat30 %>% 
   distinct(internal_id, .keep_all = T) %>% 
   group_by(party) %>% 
@@ -815,7 +815,7 @@ hc_data <-  ggl_daily %>%
   left_join(color_dat, by = "party") %>%
   mutate(party = as.factor(party)) %>% 
   mutate(party = fct_reorder(party, total_spend)) %>% 
-  filter(date_produced >= as.Date("2023-02-11") & date_produced <= as.Date("2023-03-13")) %>% 
+  filter(date_produced >= as.Date("2023-02-11") & date_produced <= as.Date("2023-03-15")) %>% 
   group_by(party) %>% 
   summarize(spend = sum(spend)) %>% 
   ungroup() %>% 
@@ -859,7 +859,7 @@ platform_dat %>%
   scale_fill_manual("Platform", values = c("#ff2700", "#008fd5") %>% rev) +
   ggthemes::theme_hc() +
   labs(x = "", y = "% of budget spent on Platform", title = "Meta vs. Google", subtitle = "Where do Dutch parties focus their money?", 
-       caption = "Source: Meta Ad Library, Google Transparency Report & data compiled by Who Targets Me.\nData Viz: Fabio Votta (@favstats). Timeframe: 12th Feb - 13th Mar 2023.") +
+       caption = "Source: Meta Ad Library, Google Transparency Report & data compiled by Who Targets Me.\nData Viz: Fabio Votta (@favstats). Timeframe: 13th Feb - 14th Mar 2023.") +
   theme(legend.position = "bottom", plot.title = element_text(size = 20, face = "bold", hjust = 0.35), text=element_text(family="mono", face = "bold"), 
         plot.caption = element_text(size = 8)) +
   guides(fill=guide_legend(nrow=1,byrow=TRUE)) 
@@ -881,7 +881,7 @@ platform_dat %>%
         plot.title = element_text(size = 15, face = "bold", hjust = 0.35), text=element_text(family="mono", face = "bold", size = 9), 
         plot.caption = element_text(size = 5))  +
   labs(x = "", y = "Total Budget on Google (incl. YouTube) & Meta (Facebook & Instagram) ads", title = "Digital Campaigning in the Netherlands", subtitle = "How much did Dutch parties spend on Meta & Google during Provincial Elections?", 
-       caption = "Source: Meta Ad Library, Google Transparency Report & data compiled by Who Targets Me.\nData Viz: Fabio Votta (@favstats). Timeframe: 11th Feb - 12th Mar 2023.")  +
+       caption = "Source: Meta Ad Library, Google Transparency Report & data compiled by Who Targets Me.\nData Viz: Fabio Votta (@favstats). Timeframe: 13th Feb - 14th Mar 2023.")  +
   geom_text(aes(label = paste0("€",scales::comma_format()(total))),#y=1.225,
              # position = position_stack(vjust = 0.5),
              hjust = 1.15, label.size = NA, color = "white",
@@ -979,7 +979,7 @@ platform_dat_daily %>%
   scale_fill_parties() +
   ggthemes::theme_hc() +
   labs(x = "", y = "Daily Budget on Meta and Google Ads", title = "Daily Spending in 2023 Provincial Elections", subtitle = "How much did Dutch parties spend on Meta & Google during Provincial Elections?", 
-       caption = "Source: Meta Ad Library, Google Transparency Report & data compiled by Who Targets Me.\nData Viz: Fabio Votta (@favstats). Timeframe: 13th Feb - 12th Mar 2023.") +
+       caption = "Source: Meta Ad Library, Google Transparency Report & data compiled by Who Targets Me.\nData Viz: Fabio Votta (@favstats). Timeframe: 13th Feb - 14th Mar 2023.") +
   theme(legend.position = "bottom", plot.subtitle = element_text(size = 15, hjust = 0.35),
         plot.title = element_text(size = 28, face = "bold", hjust = 0.35), text=element_text(family="mono", face = "bold"), 
         plot.caption = element_text(size = 8)) +
@@ -1036,12 +1036,12 @@ total_budget %>%
         plot.title = element_text(size = 13, face = "bold", hjust = 0.35), text=element_text(family="mono", face = "bold", size = 9), 
         plot.caption = element_text(size = 5))  +
   labs(x = "", y = "% of Total Budget Spend on Google (incl. YouTube) & Meta (Facebook & Instagram) ads", title = "Digital Campaigning in the 2023 Dutch Provincial Elections", subtitle = "How much did Dutch parties spend on digital ads compared to their total campaign budget?", 
-       caption = "Source: Meta Ad Library, Google Transparency Report, RTL Nieuws & data compiled by Who Targets Me.\nData Viz: Fabio Votta (@favstats). Timeframe: 11th Feb - 12th Mar 2023.")  +
+       caption = "Source: Meta Ad Library, Google Transparency Report, RTL Nieuws & data compiled by Who Targets Me.\nData Viz: Fabio Votta (@favstats). Timeframe: 13th Feb - 14th Mar 2023.")  +
   geom_text(aes(label = round(perc)),#y=1.225,
             # position = position_stack(vjust = 0.5),
             hjust = 1.45, label.size = NA, color = "white",
             size = 3) +
   annotate(geom = "text", label = "No Numbers on Total Budget", x = 15.5, y = 8, size = 3)+
-  annotate(geom = "label", label = "*2019 Budget", x = 13, y = 65, size = 3, label.size = NA)
+  annotate(geom = "label", label = "*2019 Budget", x = 13, y = 80, size = 3, label.size = NA)
 
 ggsave("img/digital_spend.png", width = 8, height = 5, dpi = 300)
