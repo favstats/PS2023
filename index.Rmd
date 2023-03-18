@@ -1271,7 +1271,7 @@ contested_dat30 %>%
   ggthemes::theme_hc() +
   labs(x = "Targeting criteria", y = "Budget spent on targeting method (in Euro)", #title = "Contested targeted interests (US midterms 2022)", subtitle = " ", 
        caption = "Source: Meta Ad Library and data compiled by Who Targets Me. Data Viz: Fabio Votta (@favstats).") +
-  theme(legend.position = "bottom", plot.title = element_text(size = 28, face = "bold", hjust = 1.25), text=element_text(family="mono", face = "bold"), plot.caption = element_text(hjust = -1.7)) +
+  theme(legend.position = "bottom", plot.title = element_text(size = 28, face = "bold", hjust = 1.25), text=element_text(family="mono", face = "bold"), plot.caption = element_text()) +
   guides(fill=guide_legend(nrow=2,byrow=TRUE)) 
 ```
 
@@ -1293,7 +1293,7 @@ contested_dat7 %>%
   ggthemes::theme_hc() +
   labs(x = "Targeting criteria", y = "Budget spent on targeting method (in Euro)", #title = "Contested targeted interests (US midterms 2022)", subtitle = " ", 
        caption = "Source: Meta Ad Library and data compiled by Who Targets Me. Data Viz: Fabio Votta (@favstats).") +
-  theme(legend.position = "bottom", plot.title = element_text(size = 28, face = "bold", hjust = 1.25), text=element_text(family="mono", face = "bold"), plot.caption = element_text(hjust = -1.7)) +
+  theme(legend.position = "bottom", plot.title = element_text(size = 28, face = "bold", hjust = 1.25), text=element_text(family="mono", face = "bold"), plot.caption = element_text()) +
   guides(fill=guide_legend(nrow=2,byrow=TRUE)) 
 ```
 
@@ -1389,7 +1389,7 @@ contested_dat %>% #count(party) %>% pull(party) %>% unique() %>% dput()
   ggthemes::theme_hc() +
   labs(x = "Targeting criteria", y = "% of budget spent on targeting method", #title = "Contested targeted interests (US midterms 2022)", subtitle = " ", 
        caption = "Source: Meta Ad Library and data compiled by Who Targets Me. Data Viz: Fabio Votta (@favstats).") +
-  theme(legend.position = "bottom", plot.title = element_text(size = 28, face = "bold", hjust = 1.25), text=element_text(family="mono", face = "bold"), plot.caption = element_text(hjust = -1.7)) +
+  theme(legend.position = "bottom", plot.title = element_text(size = 28, face = "bold", hjust = 1.25), text=element_text(family="mono", face = "bold"), plot.caption = element_text()) +
   guides(fill=guide_legend(nrow=2,byrow=TRUE)) 
     
 }
@@ -1536,7 +1536,8 @@ age_targeting %>%
     # scale_x_discrete(breaks = c("18", "24",
     #                             "34", "44",
     #                             "54", "65+")) +
-    labs(y = "% Budget Spend on Age Group") +
+    labs(y = "% Budget Spend on Age Group", 
+       caption = "Source: Meta Ad Library and data compiled by Who Targets Me. Data Viz: Fabio Votta (@favstats).") +
     coord_flip() +
     labs(x = "Age Groups\n")  +
   geom_text(size = 3.5, color = "white",
@@ -1591,7 +1592,8 @@ age_targeting7 %>%
     #                             "54", "65+")) +
     labs(y = "% Budget Spend on Age Group") +
     coord_flip() +
-    labs(x = "Age Groups\n")  +
+    labs(x = "Age Groups\n", 
+       caption = "Source: Meta Ad Library and data compiled by Who Targets Me. Data Viz: Fabio Votta (@favstats).")  +
   geom_text(size = 3.5, color = "white",
              aes(y = perc - 0.19, label = paste0(round(perc*100, 1), "%"))) +
     scale_fill_parties()
@@ -1603,7 +1605,7 @@ age_targeting7 %>%
 
 ### `r last30days_string` (Last 30 days)
 
-```{r, fig.width= 8, fig.height=5, dpi = 300}
+```{r, fig.width= 9, fig.height=5, dpi = 300}
 
 
 gender_targeting <- election_dat30 %>% 
@@ -1630,7 +1632,8 @@ gender_targeting %>%
     # scale_x_discrete(breaks = c("18", "24",
     #                             "34", "44",
     #                             "54", "65+")) +
-    labs(y = "% Budget Spend on Gender") +
+    labs(y = "% Budget Spend on Gender", 
+       caption = "Source: Meta Ad Library and data compiled by Who Targets Me. Data Viz: Fabio Votta (@favstats).") +
     coord_flip() +
     labs(x = "Gender\n")  +
   geom_label(size = 3.5, color = "black", vjust="inward",hjust="inward",
@@ -1641,7 +1644,7 @@ gender_targeting %>%
 
 ### `r last7days_string` (Last 7 days)
 
-```{r, fig.width= 8, fig.height=5, dpi = 300}
+```{r, fig.width= 9, fig.height=5, dpi = 300}
 
 gender_targeting <- election_dat7 %>% 
 group_split(party) %>% 
@@ -1667,7 +1670,8 @@ gender_targeting %>%
     # scale_x_discrete(breaks = c("18", "24",
     #                             "34", "44",
     #                             "54", "65+")) +
-    labs(y = "% Budget Spend on Gender") +
+    labs(y = "% Budget Spend on Gender", 
+       caption = "Source: Meta Ad Library and data compiled by Who Targets Me. Data Viz: Fabio Votta (@favstats).") +
     coord_flip() +
     labs(x = "Gender\n")  +
   geom_label(size = 3.5, color = "black", vjust="inward",hjust="inward",
@@ -1740,8 +1744,9 @@ election_dat30 %>%
     # scale_x_discrete(breaks = c("18", "24",
     #                             "34", "44",
     #                             "54", "65+")) +
-    labs(y = "% Budget Spend on Education") +
-    labs(x = "Education\n")   +
+    labs(y = "% Budget Spend on Education",
+         x = "Education\n", 
+       caption = "Source: Meta Ad Library and data compiled by Who Targets Me. Data Viz: Fabio Votta (@favstats).")   +
   geom_text(size = 3.5, color = "black", vjust="inward",hjust="inward",
              aes(y = perc, label = paste0(round(perc*100, 2), "%"))) +
     scale_fill_parties()
@@ -1774,8 +1779,9 @@ election_dat7 %>%
     # scale_x_discrete(breaks = c("18", "24",
     #                             "34", "44",
     #                             "54", "65+")) +
-    labs(y = "% Budget Spend on Education") +
-    labs(x = "Education\n")   +
+    labs(y = "% Budget Spend on Education",
+         x = "Education\n", 
+       caption = "Source: Meta Ad Library and data compiled by Who Targets Me. Data Viz: Fabio Votta (@favstats).")   +
   geom_text(size = 3.5, color = "black", vjust="inward",hjust="inward",
              aes(y = perc, label = paste0(round(perc*100, 2), "%"))) +
     scale_fill_parties()
@@ -1850,8 +1856,9 @@ election_dat30 %>%
     # scale_x_discrete(breaks = c("18", "24",
     #                             "34", "44",
     #                             "54", "65+")) +
-    labs(y = "% Budget Spend on Jobs") +
-    labs(x = "Job (Sectors)\n")  +
+    labs(y = "% Budget Spend on Jobs", 
+         x = "Job (Sectors)\n", 
+       caption = "Source: Meta Ad Library and data compiled by Who Targets Me. Data Viz: Fabio Votta (@favstats).")  +
   geom_text(size = 3.5, color = "black", vjust="inward",hjust="inward",
              aes(y = perc, label = paste0(round(perc*100, 1), "%")))  +
     scale_x_discrete(label = function(x) stringr::str_trunc(x, 22)) +
@@ -1889,8 +1896,9 @@ election_dat7 %>%
     # scale_x_discrete(breaks = c("18", "24",
     #                             "34", "44",
     #                             "54", "65+")) +
-    labs(y = "% Budget Spend on Jobs") +
-    labs(x = "Job (Sectors)\n")  +
+    labs(y = "% Budget Spend on Jobs",
+         x = "Job (Sectors)\n", 
+       caption = "Source: Meta Ad Library and data compiled by Who Targets Me. Data Viz: Fabio Votta (@favstats).")  +
   geom_text(size = 3.5, color = "black", vjust="inward",hjust="inward",
              aes(y = perc, label = paste0(round(perc*100, 1), "%")))  +
     scale_x_discrete(label = function(x) stringr::str_trunc(x, 22)) +
