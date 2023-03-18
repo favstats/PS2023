@@ -804,6 +804,8 @@ fb_aggr %>%
              last_updated = update_time, minmax = "Minimum"
   )
 
+####### Meta vs Google vs Snapchat #####
+
 library(tidyverse)
 total_spend_id <- election_dat30 %>%
   distinct(internal_id, .keep_all = T) %>%
@@ -890,7 +892,7 @@ platform_dat %>%
 
 ggsave("img/ggl_vs_meta.png", width = 6, height = 8, dpi = 300)
 
-
+###### Total Spend #####
 
 platform_dat %>%
   distinct(party, .keep_all = T) %>%
@@ -917,7 +919,7 @@ platformsum <- platform_dat %>%
   # mutate(party = fct_reorder(party, total)) %>%
   left_join(lab_dat) %>%
   mutate(party = factor(party, the_order)) %>%
-  mutate(platform = factor(platform, c("Meta", "Google"))) %>%
+  mutate(platform = factor(platform, c("Meta", "Google", "Snapchat"))) %>%
   drop_na(platform) %>%
   group_by(platform) %>%
   summarize(total = sum(spend))
@@ -966,7 +968,8 @@ more_data <- dir("data/reports", full.names = T) %>%
 more_data_ggl
 
 # snapchat_vvd %>% 
-  
+
+##### Daily Spend #####
 
 platform_dat_daily <- more_data_ggl %>%
   mutate(platform = "Google") %>%
@@ -1032,7 +1035,7 @@ ggsave("img/daily_spend.png", width = 12, height = 8, dpi = 300)
 
 
 
-
+######## Digital Spend ######
 
 
 total_budget <- rvest::read_html("https://www.rtlnieuws.nl/nieuws/politiek/artikel/5357473/partijen-geven-kwart-meer-uit-aan-campagne-provinciale") %>%
@@ -1064,6 +1067,18 @@ total_budget %>%
     T ~ party
   )) %>%
   left_join(digital_budget) %>%
+  mutate(perc = spend_digital/budget_ps_2023*100) %>% 
+  select(party, budget_ps_2023, spend_digital, perc) %>% 
+  clipr::write_clip()
+
+total_budget %>%
+  mutate(party = case_when(
+    party == "Partij voor de Dieren" ~ "PvdD",
+    party == "Volt" ~ "Volt Nederland",
+    party == "Van Haga/bvNL" ~ "BVNL",
+    T ~ party
+  )) %>%
+  left_join(digital_budget) %>%
   mutate(perc = spend_digital/budget_ps_2023*100) %>%
   arrange(desc(perc))  %>%
   mutate(party = fct_reorder(party, perc)) %>%
@@ -1076,7 +1091,7 @@ total_budget %>%
         plot.title = element_text(size = 13, face = "bold", hjust = 0.35), text=element_text(family="mono", face = "bold", size = 9),
         plot.caption = element_text(size = 5))  +
   labs(x = "", y = "% of Total Budget Spend on Google (incl. YouTube), Meta (Facebook & Instagram) & Snapchat ads", title = "Digital Campaigning in the 2023 Dutch Provincial Elections", subtitle = "How much did Dutch parties spend on digital ads compared to their total campaign budget?",
-       caption = "Source: Meta Ad Library, Google Transparency Report, RTL Nieuws & data compiled by Who Targets Me.\nData Viz: Fabio Votta (@favstats). Timeframe: 14th Feb - 15th Mar 2023.")  +
+       caption = "Source: Snapchat & Meta Ad Library, Google Transparency Report, RTL Nieuws & data compiled by Who Targets Me.\nData Viz: Fabio Votta (@favstats). Timeframe: 14th Feb - 15th Mar 2023.")  +
   geom_text(aes(label = round(perc)),#y=1.225,
             # position = position_stack(vjust = 0.5),
             hjust = 1.45, label.size = NA, color = "white",
@@ -1084,7 +1099,40 @@ total_budget %>%
   annotate(geom = "text", label = "No Numbers on Total Budget", x = 15.5, y = 8, size = 3)+
   annotate(geom = "label", label = "*2019 Budget", x = 13, y = 80, size = 3, label.size = NA)
 
-ggsave("img/digital_spend.png", width = 8, height = 5, dpi = 300)
+ggsave("img/digital_spend.png", width = 9, height = 5, dpi = 300)
 
 
+total_budget %>%
+  mutate(party = case_when(
+    party == "Partij voor de Dieren" ~ "PvdD",
+    party == "Volt" ~ "Volt Nederland",
+    party == "Van Haga/bvNL" ~ "BVNL",
+    T ~ party
+  )) %>%
+  left_join(digital_budget) %>%
+  mutate(perc = round(spend_digital/budget_ps_2023*100)) %>% 
+  select(party, 
+         total_budget_online_and_offline = budget_ps_2023, 
+         spend_on_digital = spend_digital, 
+         digital_perc  = perc) %>% 
+  filter(!(party %in% c("PVV", "JA21"))) %>% 
+  arrange(desc(digital_perc)) %>% 
+  clipr::write_clip()
 
+
+total_budget %>%
+  mutate(party = case_when(
+    party == "Partij voor de Dieren" ~ "PvdD",
+    party == "Volt" ~ "Volt Nederland",
+    party == "Van Haga/bvNL" ~ "BVNL",
+    T ~ party
+  )) %>%
+  left_join(digital_budget) %>%
+  mutate(perc = round(spend_digital/budget_ps_2023*100)) %>% 
+  drop_na(budget_ps_2023) %>% 
+  summarize(total = sum(budget_ps_2023, na.rm = T),
+            spend_digital = sum(spend_digital, na.rm = T))
+  # select(party, 
+  #        total_budget_online_and_offline = budget_ps_2023, 
+  #        spend_on_digital = spend_digital, 
+  #        digital_perc  = perc) 

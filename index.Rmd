@@ -877,7 +877,7 @@ ggl_all7 %>%
 
 ![](img/digital_spend.png)
 
-#### Meta vs. Google 
+#### Meta vs. Google vs. Snapchat
 
 ![](img/ggl_vs_meta.png)
 
@@ -1989,7 +1989,7 @@ all_zip  %>%
 
 
 ```{r, fig.width=5, fig.height=4, dpi = 900, eval = F}
-all_zip  %>%
+gg1 <- all_zip  %>%
     group_by(party) %>% 
     # mutate(total_spend = scale(total_spend)) %>% 
     filter(p_nw_mig_a >= 0) %>% 
@@ -2006,7 +2006,8 @@ all_zip  %>%
     labs(x = "Ad Budget Spend on Postal Codes",
          y = "% Non-Western migration background") +
     theme(legend.position = "none") +
-    labs(caption = "Data: Meta Ad Library; CBS. Data Viz: @favstats")
+    labs(caption = "Data: Meta Ad Library; CBS. Data Viz: @favstats") +
+  ylim(0,80)
 ```
 
 ```{r, fig.width=5, fig.height=2, dpi = 900, eval = F}
@@ -2035,15 +2036,15 @@ all_zip  %>%
 
 
 
-```{r, fig.width=5, fig.height=2, dpi = 900, eval = F}
+```{r, fig.width=7, fig.height=3, dpi = 900, eval = F}
 
-all_zip  %>%
+gg2 <- all_zip  %>%
     group_by(party) %>% 
     # mutate(total_spend = scale(total_spend)) %>% 
     filter(uitkminaow >= 0) %>% 
     mutate(inw_65pl = (uitkminaow/inwoner*100)) %>% 
     # filter(!(party %in% c("BVNL", "D66", "PvdD"))) %>% 
-    filter(party %in% c("CDA", "VVD")) %>% 
+    filter(party %in% c("VVD")) %>% 
 
     ggplot(aes(total_spend, inw_65pl)) +
     geom_jitter(aes(color = party))  +
@@ -2055,7 +2056,13 @@ all_zip  %>%
     labs(x = "Ad Budget Spend on Postal Codes",
          y = "% of population receiving social benefits") +
     theme(legend.position = "none") +
-    labs(caption = "Data: Meta Ad Library; CBS. Data Viz: @favstats")
+    labs(caption = "Data: Meta Ad Library; CBS. Data Viz: @favstats") +
+  ylim(0, 80)
+
+
+library(patchwork)
+
+gg1+gg2
 ```
 
 ```{r, eval = F}
@@ -2354,3 +2361,36 @@ leaflet(the_dat) %>%
     position = "bottomright")
 
 ```
+
+
+
+```{r,eval=F}
+total_sppppeen <- election_dat30 %>% 
+# filter(coalition == "Coalizione di centro-destra") %>% 
+  mutate(total_spend = total_spend_formatted) %>%
+  distinct(internal_id, .keep_all = T)  %>%
+  # mutate(total_spend = readr::parse_number(total_spend_formatted)) %>%
+  mutate(total_spend = ifelse(total_spend == 50, 1, total_spend)) %>% 
+  select(internal_id, total_spend, party) %>% 
+  arrange(desc(total_spend)) %>% 
+  group_by(party) %>% 
+  summarize(total_budget = sum(total_spend)) %>% 
+  ungroup()
+
+election_dat30 %>% 
+  filter(type == "language") %>% 
+  mutate(total_spend_formatted = total_spend_formatted*total_spend_pct) %>% 
+  group_by(value, party) %>% 
+  summarize(total_spend_formatted = sum(total_spend_formatted)) %>% 
+  arrange(desc(total_spend_formatted)) %>% 
+  ungroup() %>% 
+  group_by(party) %>% 
+  mutate(total = sum(total_spend_formatted)) %>% 
+  ungroup() %>% 
+  left_join(total_sppppeen) %>% 
+  mutate(perc = total_spend_formatted/total_budget) %>% 
+  ggplot(aes(value, perc)) +
+  geom_col() +
+  facet_wrap(~party, scales = "free_x")
+```
+
